@@ -51,7 +51,7 @@ const processAndDownloadJsonData = (file: File) => {
                 result += '\\]';
                 i += 2;
               } else if (!inLatex && text.substring(i, i + 2) === '\\\\') {
-                result += '\\n'; // Replace '\\' with '\n'
+                result += ' \\n '; // Replace '\\' with '\n'
                 i += 2;
               } else {
                 result += text[i];

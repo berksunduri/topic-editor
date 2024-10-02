@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState } from 'react'; // Import useState hook
 import './App.css';
 import updateJsonTopic from './functions/topicEdit';
 import processAndDownloadJsonData from './functions/newLineEdit';
-import bracketEdit from './functions/bracketEdit'; // Import the LaTeX bracket editing function
+import bracketEdit from './functions/bracketEdit'; // Import the new processFile function
 
 function App() {
   const [jsonFile, setJsonFile] = useState<File | null>(null); // State for the JSON file
@@ -10,8 +10,7 @@ function App() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
-      
-      {/* PDF Topic Editor */}
+
       <div className="bg-white p-8 rounded-lg shadow-2xl max-w-md w-full mb-8">
         <h1 className="text-4xl font-bold mb-8 text-center text-gray-800 animate-pulse">PDF Topic Editor</h1>
         <div className="mb-6">
@@ -75,9 +74,7 @@ function App() {
           Update Topic
         </button>
       </div>
-
-      {/* New Line Editor */}
-      <div className="bg-white p-8 rounded-lg shadow-2xl max-w-md w-full mb-8">
+      <div className="bg-white p-8 rounded-lg shadow-2xl max-w-md w-full">
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">New Line Editor</h2>
         <div className="mb-6">
           <label htmlFor="new-line-file-upload" className="block text-sm font-medium text-gray-700 mb-2">Select JSON File:</label>
@@ -126,22 +123,21 @@ function App() {
           Update New Lines
         </button>
       </div>
-
-      {/* Bracket Editor */}
+      {/* New File Upload for processFile */}
       <div className="bg-white p-8 rounded-lg shadow-2xl max-w-md w-full">
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Bracket Editor</h2>
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Process JSON File</h2>
         <div className="mb-6">
-          <label htmlFor="bracket-file-upload" className="block text-sm font-medium text-gray-700 mb-2">Select JSON File:</label>
+          <label htmlFor="process-file-upload" className="block text-sm font-medium text-gray-700 mb-2">Select JSON File:</label>
           <input
-            id="bracket-file-upload"
+            id="process-file-upload"
             type="file"
             accept=".json"
             className="block w-full text-sm text-gray-500
               file:mr-4 file:py-2 file:px-4
               file:rounded-full file:border-0
               file:text-sm file:font-semibold
-              file:bg-gradient-to-r file:from-red-500 file:to-orange-500 file:text-white
-              hover:file:bg-gradient-to-r hover:file:from-red-600 hover:file:to-orange-600
+              file:bg-gradient-to-r file:from-yellow-500 file:to-orange-500 file:text-white
+              hover:file:bg-gradient-to-r hover:file:from-yellow-600 hover:file:to-orange-600
               transition duration-300 ease-in-out
               cursor-pointer"
             onChange={(e) => {
@@ -149,27 +145,32 @@ function App() {
               if (files && files.length > 0) {
                 const file = files[0];
                 setJsonFile(file);
-                console.log("JSON file selected for bracket edit:", file.name);
+                console.log("JSON file selected for processing:", file.name);
               }
             }}
           />
         </div>
         <button 
-          className="w-full px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white font-semibold rounded-lg shadow-md hover:from-red-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-75 transition duration-300 ease-in-out transform hover:scale-105"
+          className="w-full px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold rounded-lg shadow-md hover:from-yellow-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-75 transition duration-300 ease-in-out transform hover:scale-105"
           onClick={async () => {
             if (jsonFile) {
-              const filePath = URL.createObjectURL(jsonFile); // Convert to file path
-              await bracketEdit(filePath);
-              alert('File processed and updated with new LaTeX brackets!');
+              const modifiedJson = await bracketEdit(jsonFile);
+              const url = URL.createObjectURL(new Blob([modifiedJson], { type: 'application/json' }));
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'modified_file.json';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
             } else {
-              console.log("Please select a JSON file for bracket editing");
+              console.log("Please select a JSON file to process");
             }
           }}
         >
-          Update Brackets
+          Process JSON
         </button>
       </div>
-
     </div>
   );
 }

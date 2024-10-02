@@ -124,7 +124,7 @@ function App() {
           </button>
         </div>
         <div className="bg-white p-8 rounded-lg shadow-2xl w-full">
-          <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Process JSON File</h2>
+          <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Turn Matrix Brackets to \\[\\]</h2>
           <div className="mb-6">
             <label htmlFor="process-file-upload" className="block text-sm font-medium text-gray-700 mb-2">Select JSON File:</label>
             <input

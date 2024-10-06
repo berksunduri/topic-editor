@@ -12,7 +12,7 @@ function App() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
       <div className="grid grid-cols-2 gap-8 max-w-4xl w-full">
         <div className="bg-white p-8 rounded-lg shadow-2xl w-full">
-          <h1 className="text-4xl font-bold mb-8 text-center text-gray-800 animate-pulse">PDF Topic Editor</h1>
+          <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">PDF Topic Editor</h1>
           <div className="mb-6">
             <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 mb-2">Select JSON File:</label>
             <input
@@ -124,7 +124,7 @@ function App() {
           </button>
         </div>
         <div className="bg-white p-8 rounded-lg shadow-2xl w-full">
-          <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Turn Matrix Brackets to \\[\\]</h2>
+          <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Matrix Bracket Editor</h2>
           <div className="mb-6">
             <label htmlFor="process-file-upload" className="block text-sm font-medium text-gray-700 mb-2">Select JSON File:</label>
             <input

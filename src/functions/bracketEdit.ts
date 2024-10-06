@@ -52,7 +52,7 @@
           }
           return match; // Return the original match for non-matrix content
         })
-        .replace(/(\[)(\s*?)([.,!?;])+/g, (match, p1, p2, p3) => { 
+        .replace(/(\[)(\s*?)([.,!?;])+/g, (p1, p3) => { 
           return `${p1} ${p3}`; // Bring punctuation inside with space
         })
         .replace(/\\](\s*)(?=[.,!?;])/g, '\\] ') // Ensure space before punctuation after the bracket

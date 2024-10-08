@@ -68,16 +68,12 @@ export default async function fixLatexExpressions(file: File): Promise<string> {
       '\\sqrt',
       '\\lim',
       '\\infty',
-      '\\rightarrow',
       '\\Rightarrow',
       '\\Leftarrow',
-      '\\frac',
-      '\\sqrt',
-      '\\lim',
     ];
 
     latexExpressions.forEach((expr) => {
-      const singleSlashRegex = new RegExp(`(?<!\\\\)${expr.slice(1)}`, 'g');
+      const singleSlashRegex = new RegExp(`(?<![a-zA-Z\\\\])${expr.slice(1)}(?![a-zA-Z])`, 'g');
       content = content.replace(singleSlashRegex, expr);
     });
 

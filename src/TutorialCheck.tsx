@@ -8,10 +8,20 @@ interface Tutorial {
   sourceType: string;
 }
 
-// Helper function to extract YouTube video ID from the URL
-const extractVideoId = (url: string): string | null => {
-  const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  return match ? match[1] : null;
+// Helper function to extract YouTube video ID and start/end times from the URL
+const extractVideoDetails = (url: string): { videoId: string | null; start: string | null; end: string | null } => {
+  const match = url.match(
+    /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/ // Regex to extract video ID
+  );
+
+  const startMatch = url.match(/[?&]start=(\d+)/);
+  const endMatch = url.match(/[?&]end=(\d+)/);
+
+  return {
+    videoId: match ? match[1] : null,
+    start: startMatch ? startMatch[1] : null,
+    end: endMatch ? endMatch[1] : null,
+  };
 };
 
 const GoodTutorials: React.FC = () => {
@@ -43,7 +53,7 @@ const GoodTutorials: React.FC = () => {
       ) : (
         <ul>
           {tutorials.map((tutorial, index) => {
-            const videoId = extractVideoId(tutorial.url);
+            const { videoId, start, end } = extractVideoDetails(tutorial.url);
 
             return (
               <li key={index} style={{ marginBottom: '20px' }}>
@@ -52,7 +62,7 @@ const GoodTutorials: React.FC = () => {
                   <iframe
                     width="560"
                     height="315"
-                    src={`https://www.youtube.com/embed/${videoId}`}
+                    src={`https://www.youtube.com/embed/${videoId}${start ? `?start=${start}` : ''}${end ? `&end=${end}` : ''}`}
                     title={tutorial.title}
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

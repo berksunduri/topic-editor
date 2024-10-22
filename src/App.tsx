@@ -1,274 +1,233 @@
-import { useState } from "react"; // Import useState hook
-import "./App.css";
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import updateJsonTopic from "./functions/topicEdit";
 import processAndDownloadJsonData from "./functions/newLineEdit";
 import bracketEdit from "./functions/bracketEdit"; // Import the new processFile function
 import fixLatexExpressions from "./functions/slashesEdit"; // Import the new processFile function
 
-function App() {
-  const [jsonFile, setJsonFile] = useState<File | null>(null); // State for the JSON file
-  const [topic, setTopic] = useState<string>(""); // State for the topic
+export default function JsonProcessor() {
+  const [jsonFile, setJsonFile] = useState<File | null>(null)
+  const [topic, setTopic] = useState("")
+  const [youtubeLink, setYoutubeLink] = useState("")
+  const [startTime, setStartTime] = useState("")
+  const [endTime, setEndTime] = useState("")
+  const [embedLink, setEmbedLink] = useState("")
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files && files.length > 0) {
+      setJsonFile(files[0])
+    }
+  }
+
+  const processFile = async (processor: (file: File) => Promise<string>, filename: string) => {
+    if (!jsonFile) {
+      console.log("Please select a JSON file")
+      return
+    }
+
+    try {
+      const modifiedJson = await processor(jsonFile)
+      const url = URL.createObjectURL(new Blob([modifiedJson], { type: "application/json" }))
+      const a = document.createElement("a")
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error("Error processing file:", error)
+    }
+  }
+
+  const convertYoutubeLink = () => {
+    const videoId = youtubeLink.split("v=")[1]
+    if (!videoId) {
+      setEmbedLink("Invalid YouTube link")
+      return
+    }
+
+    let embedUrl = `https://www.youtube.com/embed/${videoId}`
+    const params = []
+
+    if (startTime) {
+      const startSeconds = convertTimeToSeconds(startTime)
+      if (startSeconds !== null) params.push(`start=${startSeconds}`)
+    }
+
+    if (endTime) {
+      const endSeconds = convertTimeToSeconds(endTime)
+      if (endSeconds !== null) params.push(`end=${endSeconds}`)
+    }
+
+    if (params.length > 0) {
+      embedUrl += `?${params.join("&")}`
+    }
+
+    setEmbedLink(embedUrl)
+  }
+
+  const convertTimeToSeconds = (time: string): number | null => {
+    const parts = time.split(":").map(part => parseInt(part, 10))
+    if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+      return parts[0] * 60 + parts[1]
+    }
+    return null
+  }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
-      <div className="grid grid-cols-2 gap-8 max-w-4xl w-full">
-        <div className="bg-white p-8 rounded-lg shadow-2xl w-full">
-          <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">
-            PDF Topic Editor
-          </h1>
-          <div className="mb-6">
-            <label
-              htmlFor="file-upload"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Select JSON File:
-            </label>
-            <input
-              id="file-upload"
-              type="file"
-              accept=".json"
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-gradient-to-r file:from-blue-500 file:to-purple-500 file:text-white
-                hover:file:bg-gradient-to-r hover:file:from-blue-600 hover:file:to-purple-600
-                transition duration-300 ease-in-out
-                cursor-pointer"
-              onChange={(e) => {
-                const files = e.target.files;
-                if (files && files.length > 0) {
-                  const file = files[0];
-                  setJsonFile(file);
-                  console.log("JSON file selected:", file.name);
-                }
-              }}
-            />
-          </div>
-          <div className="mb-6">
-            <label
-              htmlFor="topic"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Topic:
-            </label>
-            <input
-              type="text"
-              id="topic"
-              name="topic"
-              placeholder="Enter topic"
-              className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 transition duration-300 ease-in-out"
-              onChange={(e) => {
-                setTopic(e.target.value);
-                console.log("Topic changed:", e.target.value);
-              }}
-            />
-          </div>
-          <button
-            className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-75 mb-4 transition duration-300 ease-in-out transform hover:scale-105"
-            onClick={async () => {
-              if (topic && jsonFile) {
-                const updatedFile = await updateJsonTopic(topic, jsonFile);
-                if (updatedFile !== undefined) {
-                  const url = URL.createObjectURL(
-                    new Blob([JSON.stringify(updatedFile)], {
-                      type: "application/json",
-                    })
-                  );
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "updated_file.json";
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                }
-              } else {
-                console.log("Please enter a topic and select a JSON file");
-              }
-            }}
-          >
-            Update Topic
-          </button>
-        </div>
-        <div className="bg-white p-8 rounded-lg shadow-2xl w-full">
-          <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
-            New Line Editor
-          </h2>
-          <div className="mb-6">
-            <label
-              htmlFor="new-line-file-upload"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Select JSON File:
-            </label>
-            <input
-              id="new-line-file-upload"
-              type="file"
-              accept=".json"
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-gradient-to-r file:from-green-500 file:to-teal-500 file:text-white
-                hover:file:bg-gradient-to-r hover:file:from-green-600 hover:file:to-teal-600
-                transition duration-300 ease-in-out
-                cursor-pointer"
-              onChange={(e) => {
-                const files = e.target.files;
-                if (files && files.length > 0) {
-                  const file = files[0];
-                  setJsonFile(file);
-                  console.log(
-                    "JSON file selected for new line edit:",
-                    file.name
-                  );
-                }
-              }}
-            />
-          </div>
-          <button
-            className="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-opacity-75 transition duration-300 ease-in-out transform hover:scale-105"
-            onClick={async () => {
-              if (jsonFile) {
-                const updatedFile = await processAndDownloadJsonData(jsonFile);
-                if (updatedFile !== undefined) {
-                  const url = URL.createObjectURL(
-                    new Blob([JSON.stringify(updatedFile)], {
-                      type: "application/json",
-                    })
-                  );
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "updated_newline_file.json";
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                }
-              } else {
-                console.log("Please select a JSON file for new line edit");
-              }
-            }}
-          >
-            Update New Lines
-          </button>
-        </div>
-        <div className="bg-white p-8 rounded-lg shadow-2xl w-full">
-          <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
-            Matrix Bracket Editor
-          </h2>
-          <div className="mb-6">
-            <label
-              htmlFor="process-file-upload"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Select JSON File:
-            </label>
-            <input
-              id="process-file-upload"
-              type="file"
-              accept=".json"
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-gradient-to-r file:from-yellow-500 file:to-orange-500 file:text-white
-                hover:file:bg-gradient-to-r hover:file:from-yellow-600 hover:file:to-orange-600
-                transition duration-300 ease-in-out
-                cursor-pointer"
-              onChange={(e) => {
-                const files = e.target.files;
-                if (files && files.length > 0) {
-                  const file = files[0];
-                  setJsonFile(file);
-                  console.log("JSON file selected for processing:", file.name);
-                }
-              }}
-            />
-          </div>
-          <button
-            className="w-full px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold rounded-lg shadow-md hover:from-yellow-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-75 transition duration-300 ease-in-out transform hover:scale-105"
-            onClick={async () => {
-              if (jsonFile) {
-                const modifiedJson = await bracketEdit(jsonFile);
-                const url = URL.createObjectURL(
-                  new Blob([modifiedJson], { type: "application/json" })
-                );
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "modified_file.json";
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-              } else {
-                console.log("Please select a JSON file to process");
-              }
-            }}
-          >
-            Process JSON
-          </button>
-        </div>
-        <div className="bg-white p-8 rounded-lg shadow-2xl w-full">
-          <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
-            LaTeX Expression Fixer
-          </h2>
-          <div className="mb-6">
-            <label
-              htmlFor="latex-file-upload"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Select JSON File:
-            </label>
-            <input
-              id="latex-file-upload"
-              type="file"
-              accept=".json"
-              className="block w-full text-sm text-gray-500
-        file:mr-4 file:py-2 file:px-4
-        file:rounded-full file:border-0
-        file:text-sm file:font-semibold
-        file:bg-gradient-to-r file:from-blue-500 file:to-indigo-500 file:text-white
-        hover:file:bg-gradient-to-r hover:file:from-blue-600 hover:file:to-indigo-600
-        transition duration-300 ease-in-out
-        cursor-pointer"
-              onChange={(e) => {
-                const files = e.target.files;
-                if (files && files.length > 0) {
-                  const file = files[0];
-                  setJsonFile(file);
-                  console.log("JSON file selected for processing:", file.name);
-                }
-              }}
-            />
-          </div>
-          <button
-            className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition duration-300 ease-in-out transform hover:scale-105"
-            onClick={async () => {
-              if (jsonFile) {
-                const modifiedJson = await fixLatexExpressions(jsonFile);
-                const url = URL.createObjectURL(
-                  new Blob([modifiedJson], { type: "application/json" })
-                );
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "latex_fixed_file.json";
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-              } else {
-                console.log("Please select a JSON file to process");
-              }
-            }}
-          >
-            Process JSON
-          </button>
-        </div>
-      </div>
+    <div className="container mx-auto p-4 max-w-4xl">
+      <h1 className="text-4xl font-bold mb-8 text-center">JSON File Processor</h1>
+      <Tabs defaultValue="topic">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="topic">Topic Editor</TabsTrigger>
+          <TabsTrigger value="newline">New Line Editor</TabsTrigger>
+          <TabsTrigger value="bracket">Matrix Bracket Editor</TabsTrigger>
+          <TabsTrigger value="latex">LaTeX Fixer</TabsTrigger>
+          <TabsTrigger value="youtube">YouTube Embedder</TabsTrigger>
+        </TabsList>
+        <Card className="mt-4">
+          <CardContent className="p-6">
+            <TabsContent value="topic">
+              <CardHeader>
+                <CardTitle>PDF Topic Editor</CardTitle>
+                <CardDescription>
+                  Edits all topics in the JSON file to the desired text. This will update all topic fields simultaneously.
+                </CardDescription>
+              </CardHeader>
+              <div className="mb-6">
+                <Label htmlFor="file-upload">Select JSON File</Label>
+                <Input id="file-upload" type="file" accept=".json" onChange={handleFileChange} className="mt-2 input-file" />
+              </div>
+              <div className="mb-6">
+                <Label htmlFor="topic">Topic</Label>
+                <Input
+                  id="topic"
+                  placeholder="Enter topic"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  className="mt-2"
+                />
+              </div>
+              <Button
+                onClick={() => processFile((file) => updateJsonTopic(topic, file), "updated_topic_file.json")}
+                className="w-full button"
+              >
+                Update Topic
+              </Button>
+            </TabsContent>
+            <TabsContent value="newline">
+              <CardHeader>
+                <CardTitle>New Line Editor</CardTitle>
+                <CardDescription>
+                  Removes '\n' characters inside KaTeX expressions. This helps to ensure proper rendering of mathematical formulas.
+                </CardDescription>
+              </CardHeader>
+              <div className="mb-6">
+                <Label htmlFor="file-upload-newline">Select JSON File</Label>
+                <Input id="file-upload-newline" type="file" accept=".json" onChange={handleFileChange} className="mt-2 input-file" />
+              </div>
+              <Button
+                onClick={() => processFile(processAndDownloadJsonData, "updated_newline_file.json")}
+                className="w-full button"
+              >
+                Remove New Lines in KaTeX
+              </Button>
+            </TabsContent>
+            <TabsContent value="bracket">
+              <CardHeader>
+                <CardTitle>Matrix Bracket Editor</CardTitle>
+                <CardDescription>
+                  Finds matrices inside KaTeX expressions and changes their brackets to '\[' and '\]'. This improves the display of matrices in LaTeX.
+                </CardDescription>
+              </CardHeader>
+              <div className="mb-6">
+                <Label htmlFor="file-upload-bracket">Select JSON File</Label>
+                <Input id="file-upload-bracket" type="file" accept=".json" onChange={handleFileChange} className="mt-2 input-file" />
+              </div>
+              <Button onClick={() => processFile(bracketEdit, "modified_bracket_file.json")} className="w-full button">
+                Update Matrix Brackets
+              </Button>
+            </TabsContent>
+            <TabsContent value="latex">
+              <CardHeader>
+                <CardTitle>LaTeX Expression Fixer</CardTitle>
+                <CardDescription>
+                  Fixes slash-related errors in LaTeX expressions. For example, it will change '\cos' to '\\cos', ensuring proper LaTeX rendering.
+                </CardDescription>
+              </CardHeader>
+              <div className="mb-6">
+                <Label htmlFor="file-upload-latex">Select JSON File</Label>
+                <Input id="file-upload-latex" type="file" accept=".json" onChange={handleFileChange} className="mt-2 input-file" />
+              </div>
+              <Button onClick={() => processFile(fixLatexExpressions, "latex_fixed_file.json")} className="w-full button">
+                Fix LaTeX Expressions
+              </Button>
+            </TabsContent>
+            <TabsContent value="youtube">
+              <CardHeader>
+                <CardTitle>YouTube Link Converter</CardTitle>
+                <CardDescription>
+                  Converts a YouTube link to its embed version with optional start and end times.
+                </CardDescription>
+              </CardHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="youtube-link">YouTube Link</Label>
+                  <Input
+                    id="youtube-link"
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    value={youtubeLink}
+                    onChange={(e) => setYoutubeLink(e.target.value)}
+                    className="mt-2"
+                  />
+                </div>
+                <div className="flex space-x-4">
+                  <div className="flex-1">
+                    <Label htmlFor="start-time">Start Time (mm:ss)</Label>
+                    <Input
+                      id="start-time"
+                      placeholder="00:00"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Label htmlFor="end-time">End Time (mm:ss)</Label>
+                    <Input
+                      id="end-time"
+                      placeholder="00:00"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+                <Button onClick={convertYoutubeLink} className="w-full button">
+                  Convert Link
+                </Button>
+                {embedLink && (
+                  <div className="mt-4">
+                    <Label htmlFor="embed-link">Embed Link</Label>
+                    <Input
+                      id="embed-link"
+                      value={embedLink}
+                      readOnly
+                      className="mt-2"
+                    />
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          </CardContent>
+        </Card>
+      </Tabs>
     </div>
-  );
+  )
 }
-
-export default App;

@@ -12,11 +12,11 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import updateJsonTopic from "./functions/topicEdit";
 import processAndDownloadJsonData from "./functions/newLineEdit";
-import bracketEdit from "./functions/bracketEdit"; // Import the new processFile function
-import fixLatexExpressions from "./functions/slashesEdit"; // Import the new processFile function
+import bracketEdit from "./functions/bracketEdit";
+import fixLatexExpressions from "./functions/slashesEdit";
 import { Textarea } from "@/components/ui/textarea";
-import { Copy } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { Copy } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function JsonProcessor() {
   const [jsonFile, setJsonFile] = useState<File | null>(null);
@@ -32,7 +32,7 @@ export default function JsonProcessor() {
   const [tutorialSourceType, setTutorialSourceType] = useState("");
   const [tutorialJson, setTutorialJson] = useState("");
 
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -113,7 +113,7 @@ export default function JsonProcessor() {
         setTutorialSourceType("other");
       }
 
-      // Generate the JSON structure
+      // Generate the JSON
       const jsonStructure = {
         topic: tutorialTopic,
         sourceType: tutorialSourceType,
@@ -135,7 +135,7 @@ export default function JsonProcessor() {
       console.error("Failed to copy text: ", err);
       toast({
         title: "Copy failed",
-        description: "Failed to copy the JSON content. Please try again."
+        description: "Failed to copy the JSON content. Please try again.",
       });
     }
   };
@@ -406,4 +406,3 @@ export default function JsonProcessor() {
     </div>
   );
 }
-

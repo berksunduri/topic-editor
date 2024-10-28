@@ -13,10 +13,10 @@ export default async function fixLatexExpressions(file: File): Promise<string> {
       const content = event.target?.result as string;
 
       try {
-        // Attempt to fix the faulty JSON using json5
+        // try to fix this broken JSON with json5
         const jsonData = JSON5.parse(content);
 
-        // Process the parsed JSON as before
+        // process the JSON as before
         jsonData.forEach((item: Content & { options?: Content[] }) => {
           if (item.content) {
             item.content = modifyLatex(item.content);

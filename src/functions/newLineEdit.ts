@@ -1,5 +1,3 @@
-// Interface for the JSON objects
-
 interface Option {
   content: string;
   isCorrect: boolean;
@@ -16,7 +14,6 @@ interface JsonObject {
   options?: Option[];
 }
 
-// Function to replace \\ with \n outside of LaTeX math expressions
 const processAndDownloadJsonData = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -52,7 +49,7 @@ const processAndDownloadJsonData = (file: File): Promise<string> => {
                   result += "\\]";
                   i += 2;
                 } else if (!inLatex && text.substring(i, i + 2) === "\\\\") {
-                  result += "\n"; // Replace '\\' with newline
+                  result += "\\n"; // Replace '\\' with newline
                   i += 2;
                 } else {
                   result += text[i];
@@ -80,7 +77,7 @@ const processAndDownloadJsonData = (file: File): Promise<string> => {
                     typeof option.explanation === "string"
                       ? replaceOutsideLatex(option.explanation)
                       : option.explanation,
-                })),
+                }))
               };
             });
 
@@ -91,18 +88,7 @@ const processAndDownloadJsonData = (file: File): Promise<string> => {
           }
         })();
 
-        // Download the processed data
-        const blob = new Blob([processedData], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "processed_data.json";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        resolve(processedData); // Resolve the promise with the processed data as string
+        resolve(processedData); // Resolve with processed data only
       } catch (error) {
         console.error("Error processing file:", error);
         reject(error); // Reject the promise on error

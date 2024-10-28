@@ -43,22 +43,21 @@
     });
 
     function modifyLatex(content: string): string {
-      const regex = /\\\((.*?)\\\)/g; // Match content inside \( and \)
+      const regex = /\\\((.*?)\\\)/g; // Finds anything between \( and \)
     
       return content
         .replace(regex, (match, p1) => {
           if (p1.includes('matrix')) {
-            return `\\[${p1}\\]`; // Change \( to \[ for matrices
+            return `\\[${p1}\\]`; // Swaps \( to \[ for matrix content
           }
-          return match; // Return the original match for non-matrix content
+          return match; // Keeps original if it's not a matrix
         })
         .replace(/(\[)(\s*?)([.,!?;])+/g, (p1, p3) => { 
-          return `${p1} ${p3}`; // Bring punctuation inside with space
+          return `${p1} ${p3}`; // Adds a space between bracket and punctuation
         })
-        .replace(/\\](\s*)(?=[.,!?;])/g, '\\] ') // Ensure space before punctuation after the bracket
+        .replace(/\\](\s*)(?=[.,!?;])/g, '\\] ') // Makes sure we have space before punctuation
     
-        // New edit to place punctuation before the closing bracket and double slashes
-        .replace(/\\](\s*)([.,!?;])+/g, '$2\\]'); // Move punctuation before the closing bracket
-    }
-    
+        // Handles the punctuation cleanup at the end
+        .replace(/\\](\s*)([.,!?;])+/g, '$2\\]'); // Moves punctuation inside the bracket
+    }    
   }

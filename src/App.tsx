@@ -66,41 +66,66 @@ export default function JsonProcessor() {
       console.error("Error processing file:", error);
     }
   };
-
-  const convertYoutubeLink = () => {
-    const videoId = youtubeLink.split("v=")[1];
+  const convertYoutubeLink = (link: string) => {
+    const videoId = link.split("v=")[1]
     if (!videoId) {
-      setEmbedLink("Invalid YouTube link");
-      return;
+      setEmbedLink("Invalid YouTube link")
+      return
     }
 
-    let embedUrl = `https://www.youtube.com/embed/${videoId}`;
-    const params = [];
+    let embedUrl = `https://www.youtube.com/embed/${videoId}`
+    const params = []
 
     if (startTime) {
-      const startSeconds = convertTimeToSeconds(startTime);
-      if (startSeconds !== null) params.push(`start=${startSeconds}`);
+      const startSeconds = convertTimeToSeconds(startTime)
+      if (startSeconds !== null) params.push(`start=${startSeconds}`)
     }
 
     if (endTime) {
-      const endSeconds = convertTimeToSeconds(endTime);
-      if (endSeconds !== null) params.push(`end=${endSeconds}`);
+      const endSeconds = convertTimeToSeconds(endTime)
+      if (endSeconds !== null) params.push(`end=${endSeconds}`)
     }
 
     if (params.length > 0) {
-      embedUrl += `?${params.join("&")}`;
+      embedUrl += `?${params.join("&")}`
     }
 
-    setEmbedLink(embedUrl);
-  };
+    setEmbedLink(embedUrl)
+  }
 
   const convertTimeToSeconds = (time: string): number | null => {
-    const parts = time.split(":").map((part) => parseInt(part, 10));
+    const parts = time.split(":").map(part => parseInt(part, 10))
     if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-      return parts[0] * 60 + parts[1];
+      return parts[0] * 60 + parts[1]
     }
-    return null;
-  };
+    return null
+  }
+
+  useEffect(() => {
+    if (tutorialYoutubeLink) {
+      if (tutorialYoutubeLink.includes("youtube.com")) {
+        setTutorialSourceType("youtube")
+      } else if (tutorialYoutubeLink.includes("khanacademy.org")) {
+        setTutorialSourceType("khan_academy")
+      } else {
+        setTutorialSourceType("other")
+      }
+
+      const jsonStructure = {
+        topic: tutorialTopic,
+        sourceType: tutorialSourceType,
+        title: tutorialTitle,
+        url: tutorialYoutubeLink
+      }
+      setTutorialJson(JSON.stringify(jsonStructure, null, 2))
+    }
+  }, [tutorialTopic, tutorialYoutubeLink, tutorialTitle, tutorialSourceType])
+
+  useEffect(() => {
+    if (youtubeLink) {
+      convertYoutubeLink(youtubeLink);
+    }
+  }, [youtubeLink, startTime, endTime, convertYoutubeLink]);
 
   useEffect(() => {
     if (tutorialYoutubeLink) {
@@ -285,8 +310,7 @@ export default function JsonProcessor() {
               <CardHeader>
                 <CardTitle>YouTube Link Converter</CardTitle>
                 <CardDescription>
-                  Converts a YouTube link to its embed version with optional
-                  start and end times.
+                  Converts a YouTube link to its embed version with optional start and end times.
                 </CardDescription>
               </CardHeader>
               <div className="space-y-4">
@@ -296,7 +320,10 @@ export default function JsonProcessor() {
                     id="youtube-link"
                     placeholder="https://www.youtube.com/watch?v=..."
                     value={youtubeLink}
-                    onChange={(e) => setYoutubeLink(e.target.value)}
+                    onChange={(e) => {
+                      setYoutubeLink(e.target.value);
+                      convertYoutubeLink(e.target.value);
+                    }}
                     className="mt-2"
                   />
                 </div>
@@ -322,9 +349,6 @@ export default function JsonProcessor() {
                     />
                   </div>
                 </div>
-                <Button onClick={convertYoutubeLink} className="w-full button">
-                  Convert Link
-                </Button>
                 {embedLink && (
                   <div className="mt-4">
                     <Label htmlFor="embed-link">Embed Link</Label>

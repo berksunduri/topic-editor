@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import updateJsonTopic from "./functions/topicEdit";
 import { processCombinedJson } from "./functions/combinedJsonProcessor";
 import { Textarea } from "@/components/ui/textarea";
@@ -66,59 +67,59 @@ export default function JsonProcessor() {
     }
   };
   const convertYoutubeLink = (link: string) => {
-    const videoId = link.split("v=")[1]
+    const videoId = link.split("v=")[1];
     if (!videoId) {
-      setEmbedLink("Invalid YouTube link")
-      return
+      setEmbedLink("Invalid YouTube link");
+      return;
     }
 
-    let embedUrl = `https://www.youtube.com/embed/${videoId}`
-    const params = []
+    let embedUrl = `https://www.youtube.com/embed/${videoId}`;
+    const params = [];
 
     if (startTime) {
-      const startSeconds = convertTimeToSeconds(startTime)
-      if (startSeconds !== null) params.push(`start=${startSeconds}`)
+      const startSeconds = convertTimeToSeconds(startTime);
+      if (startSeconds !== null) params.push(`start=${startSeconds}`);
     }
 
     if (endTime) {
-      const endSeconds = convertTimeToSeconds(endTime)
-      if (endSeconds !== null) params.push(`end=${endSeconds}`)
+      const endSeconds = convertTimeToSeconds(endTime);
+      if (endSeconds !== null) params.push(`end=${endSeconds}`);
     }
 
     if (params.length > 0) {
-      embedUrl += `?${params.join("&")}`
+      embedUrl += `?${params.join("&")}`;
     }
 
-    setEmbedLink(embedUrl)
-  }
+    setEmbedLink(embedUrl);
+  };
 
   const convertTimeToSeconds = (time: string): number | null => {
-    const parts = time.split(":").map(part => parseInt(part, 10))
+    const parts = time.split(":").map((part) => parseInt(part, 10));
     if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-      return parts[0] * 60 + parts[1]
+      return parts[0] * 60 + parts[1];
     }
-    return null
-  }
+    return null;
+  };
 
   useEffect(() => {
     if (tutorialYoutubeLink) {
       if (tutorialYoutubeLink.includes("youtube.com")) {
-        setTutorialSourceType("youtube")
+        setTutorialSourceType("youtube");
       } else if (tutorialYoutubeLink.includes("khanacademy.org")) {
-        setTutorialSourceType("khan_academy")
+        setTutorialSourceType("khan_academy");
       } else {
-        setTutorialSourceType("other")
+        setTutorialSourceType("other");
       }
 
       const jsonStructure = {
         topic: tutorialTopic,
         sourceType: tutorialSourceType,
         title: tutorialTitle,
-        url: tutorialYoutubeLink
-      }
-      setTutorialJson(JSON.stringify(jsonStructure, null, 2))
+        url: tutorialYoutubeLink,
+      };
+      setTutorialJson(JSON.stringify(jsonStructure, null, 2));
     }
-  }, [tutorialTopic, tutorialYoutubeLink, tutorialTitle, tutorialSourceType])
+  }, [tutorialTopic, tutorialYoutubeLink, tutorialTitle, tutorialSourceType]);
 
   useEffect(() => {
     if (youtubeLink) {
@@ -165,18 +166,24 @@ export default function JsonProcessor() {
   };
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <h1 className="text-4xl font-bold mb-8 text-center">
-        JSON File Processor
-      </h1>
-      <Tabs defaultValue="topic">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="topic">Topic Editor</TabsTrigger>
-          <TabsTrigger value="newline">New Line Editor</TabsTrigger>
-          <TabsTrigger value="bracket">Matrix Bracket Editor</TabsTrigger>
-          <TabsTrigger value="latex">LaTeX Fixer</TabsTrigger>
-          <TabsTrigger value="youtube">YouTube Embedder</TabsTrigger>
-          <TabsTrigger value="tutorial">Tutorial Creator</TabsTrigger>
-        </TabsList>
+      <h1 className="text-3xl font-bold mb-6 text-center">JSON File Processor</h1>
+      <Tabs defaultValue="topic" className="w-full">
+        <ScrollArea className="w-full">
+          <TabsList className="inline-flex h-auto space-x-2 rounded-md bg-muted p-1 text-muted-foreground">
+            <TabsTrigger value="topic" className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              Topic Editor
+            </TabsTrigger>
+            <TabsTrigger value="combined" className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              Combined Operations
+            </TabsTrigger>
+            <TabsTrigger value="youtube" className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              YouTube Embedder
+            </TabsTrigger>
+            <TabsTrigger value="tutorial" className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              Tutorial Creator
+            </TabsTrigger>
+          </TabsList>
+        </ScrollArea>
         <Card className="mt-4">
           <CardContent className="p-6">
             <TabsContent value="topic">
@@ -223,7 +230,8 @@ export default function JsonProcessor() {
               <CardHeader>
                 <CardTitle>Combined JSON Operations</CardTitle>
                 <CardDescription>
-                  Performs New Line Editing, Matrix Bracket Editing, and LaTeX Expression Fixing in a single operation.
+                  Performs New Line Editing, Matrix Bracket Editing, and LaTeX
+                  Expression Fixing in a single operation.
                 </CardDescription>
               </CardHeader>
               <div className="mb-6">
@@ -238,7 +246,10 @@ export default function JsonProcessor() {
               </div>
               <Button
                 onClick={() =>
-                  processFile(processCombinedJson, "processed_combined_file.json")
+                  processFile(
+                    processCombinedJson,
+                    "processed_combined_file.json"
+                  )
                 }
                 className="w-full button"
               >
@@ -249,7 +260,8 @@ export default function JsonProcessor() {
               <CardHeader>
                 <CardTitle>YouTube Link Converter</CardTitle>
                 <CardDescription>
-                  Converts a YouTube link to its embed version with optional start and end times.
+                  Converts a YouTube link to its embed version with optional
+                  start and end times.
                 </CardDescription>
               </CardHeader>
               <div className="space-y-4">

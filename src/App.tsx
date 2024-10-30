@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,9 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import updateJsonTopic from "./functions/topicEdit";
-import processAndDownloadJsonData from "./functions/newLineEdit";
-import bracketEdit from "./functions/bracketEdit";
-import fixLatexExpressions from "./functions/slashesEdit";
+import { processCombinedJson } from "./functions/combinedJsonProcessor";
 import { Textarea } from "@/components/ui/textarea";
 import { Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -220,18 +219,17 @@ export default function JsonProcessor() {
                 Update Topic
               </Button>
             </TabsContent>
-            <TabsContent value="newline">
+            <TabsContent value="combined">
               <CardHeader>
-                <CardTitle>New Line Editor</CardTitle>
+                <CardTitle>Combined JSON Operations</CardTitle>
                 <CardDescription>
-                  Removes '\n' characters inside KaTeX expressions. This helps
-                  to ensure proper rendering of mathematical formulas.
+                  Performs New Line Editing, Matrix Bracket Editing, and LaTeX Expression Fixing in a single operation.
                 </CardDescription>
               </CardHeader>
               <div className="mb-6">
-                <Label htmlFor="file-upload-newline">Select JSON File</Label>
+                <Label htmlFor="file-upload-combined">Select JSON File</Label>
                 <Input
-                  id="file-upload-newline"
+                  id="file-upload-combined"
                   type="file"
                   accept=".json"
                   onChange={handleFileChange}
@@ -240,70 +238,11 @@ export default function JsonProcessor() {
               </div>
               <Button
                 onClick={() =>
-                  processFile(
-                    processAndDownloadJsonData,
-                    "updated_newline_file.json"
-                  )
+                  processFile(processCombinedJson, "processed_combined_file.json")
                 }
                 className="w-full button"
               >
-                Remove New Lines in KaTeX
-              </Button>
-            </TabsContent>
-            <TabsContent value="bracket">
-              <CardHeader>
-                <CardTitle>Matrix Bracket Editor</CardTitle>
-                <CardDescription>
-                  Finds matrices inside KaTeX expressions and changes their
-                  brackets to '\[' and '\]'. This improves the display of
-                  matrices in LaTeX.
-                </CardDescription>
-              </CardHeader>
-              <div className="mb-6">
-                <Label htmlFor="file-upload-bracket">Select JSON File</Label>
-                <Input
-                  id="file-upload-bracket"
-                  type="file"
-                  accept=".json"
-                  onChange={handleFileChange}
-                  className="mt-2 input-file"
-                />
-              </div>
-              <Button
-                onClick={() =>
-                  processFile(bracketEdit, "modified_bracket_file.json")
-                }
-                className="w-full button"
-              >
-                Update Matrix Brackets
-              </Button>
-            </TabsContent>
-            <TabsContent value="latex">
-              <CardHeader>
-                <CardTitle>LaTeX Expression Fixer</CardTitle>
-                <CardDescription>
-                  Fixes slash-related errors in LaTeX expressions. For example,
-                  it will change '\cos' to '\\cos', ensuring proper LaTeX
-                  rendering.
-                </CardDescription>
-              </CardHeader>
-              <div className="mb-6">
-                <Label htmlFor="file-upload-latex">Select JSON File</Label>
-                <Input
-                  id="file-upload-latex"
-                  type="file"
-                  accept=".json"
-                  onChange={handleFileChange}
-                  className="mt-2 input-file"
-                />
-              </div>
-              <Button
-                onClick={() =>
-                  processFile(fixLatexExpressions, "latex_fixed_file.json")
-                }
-                className="w-full button"
-              >
-                Fix LaTeX Expressions
+                Process JSON (Combined Operations)
               </Button>
             </TabsContent>
             <TabsContent value="youtube">

@@ -46,10 +46,14 @@ export default function JsonProcessor() {
     filename: string
   ) => {
     if (!jsonFile) {
-      console.log("Please select a JSON file");
+      toast({
+        title: "Error",
+        description: "Please select a JSON file",
+        variant: "destructive",
+      });
       return;
     }
-
+  
     try {
       const modifiedJson = await processor(jsonFile);
       const url = URL.createObjectURL(
@@ -62,8 +66,17 @@ export default function JsonProcessor() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      toast({
+        title: "Success",
+        description: `File processed and downloaded as ${filename}`,
+      });
     } catch (error) {
       console.error("Error processing file:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to process the file. Please try again.",
+        variant: "destructive",
+      });
     }
   };
   const convertYoutubeLink = (link: string) => {
@@ -166,20 +179,34 @@ export default function JsonProcessor() {
   };
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6 text-center">JSON File Processor</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        JSON File Processor
+      </h1>
       <Tabs defaultValue="topic" className="w-full">
         <ScrollArea className="w-full">
           <TabsList className="inline-flex h-auto space-x-2 rounded-md bg-muted p-1 text-muted-foreground">
-            <TabsTrigger value="topic" className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger
+              value="topic"
+              className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            >
               Topic Editor
             </TabsTrigger>
-            <TabsTrigger value="combined" className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger
+              value="combined"
+              className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            >
               Combined Operations
             </TabsTrigger>
-            <TabsTrigger value="youtube" className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger
+              value="youtube"
+              className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            >
               YouTube Embedder
             </TabsTrigger>
-            <TabsTrigger value="tutorial" className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger
+              value="tutorial"
+              className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            >
               Tutorial Creator
             </TabsTrigger>
           </TabsList>

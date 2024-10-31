@@ -4,33 +4,42 @@ interface Content {
 }
 
 export default async function bracketEdit(file: File): Promise<string> {
-  try {
-    const jsonData = JSON.parse(await file.text());
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
 
-    const modifyLatex = (content: string): string => {
-      return content
-        .replace(/\\$$(.*?matrix.*?)\\$$/g, '\\[$1\\]')
-        .replace(/(\[)\s*([.,!?;])/g, '$1 $2')
-        .replace(/\\](\s*)(?=[.,!?;])/g, '\\] ')
-        .replace(/\\](\s*)([.,!?;])+/g, '$2\\]');
-    };
+    reader.onload = (event) => {
+      try {
+        const jsonData = JSON.parse(event.target?.result as string);
 
-    const processItem = (item: Content & { options?: Content[] }) => {
-      if (item.content) item.content = modifyLatex(item.content);
-      if (Array.isArray(item.options)) {
-        item.options.forEach(option => {
-          if (option.content) option.content = modifyLatex(option.content);
-          if (option.explanation) option.explanation = modifyLatex(option.explanation);
+        jsonData.forEach((item: Content & { options?: Content[] }) => {
+          if (item.content) item.content = modifyLatex(item.content);
+
+          if (item.options && Array.isArray(item.options)) {
+            item.options.forEach((option: Content) => {
+              if (option.content) option.content = modifyLatex(option.content);
+              if (option.explanation) option.explanation = modifyLatex(option.explanation);
+            });
+          }
         });
+
+        const modifiedJson = JSON.stringify(jsonData, null, 2);
+        console.log('JSON processing completed');
+        resolve(modifiedJson);
+      } catch (err) {
+        console.error(err);
+        reject(`Error processing file: ${err}`);
       }
     };
 
-    jsonData.forEach(processItem);
+    reader.onerror = (error) => reject(`Error reading file: ${error}`);
+    reader.readAsText(file);
+  });
 
-    console.log('JSON processing completed');
-    return JSON.stringify(jsonData, null, 2);
-  } catch (err) {
-    console.error('Error processing file:', err);
-    throw new Error(`Error processing file: ${err}`);
+  function modifyLatex(content: string): string {
+    return content
+      .replace(/\\\((.*?)\\\)/g, (match, p1) => p1.includes('matrix') ? `\\[${p1}\\]` : match)
+      .replace(/(\[)(\s*?)([.,!?;])+/g, (p1, p3) => `${p1} ${p3}`)
+      .replace(/\\](\s*)(?=[.,!?;])/g, '\\] ')
+      .replace(/\\](\s*)([.,!?;])+/g, '$2\\]');
   }
 }

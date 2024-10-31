@@ -1,3 +1,5 @@
+import JSON5 from 'json5';
+
 interface Option {
   content: string;
   isCorrect: boolean;
@@ -17,7 +19,7 @@ interface JsonObject {
 const processJsonData = async (file: File): Promise<string> => {
   try {
     const jsonData = await file.text();
-    const jsonArray: JsonObject[] = JSON.parse(jsonData);
+    const jsonArray: JsonObject[] = JSON5.parse(jsonData);
 
     const replaceOutsideLatex = (text: string): string => {
       const latexRegex = /\\[$$[].*?\\[$$\]]/gs;
@@ -43,7 +45,11 @@ const processJsonData = async (file: File): Promise<string> => {
     return JSON.stringify(processedArray, null, 2);
   } catch (error) {
     console.error("Error processing the JSON data:", error);
-    throw new Error("Failed to process JSON data");
+    if (error instanceof Error) {
+      throw new Error(`Failed to process JSON data: ${error.message}`);
+    } else {
+      throw new Error("Failed to process JSON data: Unknown error");
+    }
   }
 };
 

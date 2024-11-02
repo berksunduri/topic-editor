@@ -1,3 +1,5 @@
+import JSON5 from 'json5';
+
 interface Option {
   content: string;
   isCorrect: boolean;
@@ -17,7 +19,7 @@ interface JsonObject {
 const processJsonData = async (file: File): Promise<string> => {
   try {
     const jsonData = await file.text();
-    const jsonArray: JsonObject[] = JSON.parse(jsonData);
+    const jsonArray: JsonObject[] = JSON5.parse(jsonData);
 
     const replaceOutsideLatex = (text: string): string => {
       const latexRegex = /\\[$[].*?\\[$\]]/gs;

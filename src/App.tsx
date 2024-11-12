@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +29,8 @@ export default function JsonProcessor() {
   const [tutorialYoutubeLink, setTutorialYoutubeLink] = useState("");
   const [tutorialTitle, setTutorialTitle] = useState("");
   const [tutorialSourceType, setTutorialSourceType] = useState("");
+  const [tutorialLanguage, setTutorialLanguage] = useState("");
+  const [tutorialUnit, setTutorialUnit] = useState("");
   const [tutorialJson, setTutorialJson] = useState("");
 
   const { toast } = useToast();
@@ -53,7 +54,7 @@ export default function JsonProcessor() {
       });
       return;
     }
-  
+
     try {
       const modifiedJson = await processor(jsonFile);
       const url = URL.createObjectURL(
@@ -79,6 +80,7 @@ export default function JsonProcessor() {
       });
     }
   };
+
   const convertYoutubeLink = (link: string) => {
     const videoId = link.split("v=")[1];
     if (!videoId) {
@@ -129,38 +131,19 @@ export default function JsonProcessor() {
         sourceType: tutorialSourceType,
         title: tutorialTitle,
         url: tutorialYoutubeLink,
+        language: tutorialLanguage,
+        unit: tutorialUnit,
+        embedLink: embedLink,
       };
       setTutorialJson(JSON.stringify(jsonStructure, null, 2));
     }
-  }, [tutorialTopic, tutorialYoutubeLink, tutorialTitle, tutorialSourceType]);
-
-  useEffect(() => {
-    if (youtubeLink) {
-      convertYoutubeLink(youtubeLink);
-    }
-  }, [youtubeLink, startTime, endTime, convertYoutubeLink]);
+  }, [tutorialTopic, tutorialYoutubeLink, tutorialTitle, tutorialSourceType, tutorialLanguage, tutorialUnit, embedLink]);
 
   useEffect(() => {
     if (tutorialYoutubeLink) {
-      // Determine the source type based on the link
-      if (tutorialYoutubeLink.includes("youtube.com")) {
-        setTutorialSourceType("youtube");
-      } else if (tutorialYoutubeLink.includes("khanacademy.org")) {
-        setTutorialSourceType("khan_academy");
-      } else {
-        setTutorialSourceType("other");
-      }
-
-      // Generate the JSON
-      const jsonStructure = {
-        topic: tutorialTopic,
-        sourceType: tutorialSourceType,
-        title: tutorialTitle,
-        url: tutorialYoutubeLink,
-      };
-      setTutorialJson(JSON.stringify(jsonStructure, null, 2));
+      convertYoutubeLink(tutorialYoutubeLink);
     }
-  }, [tutorialTopic, tutorialYoutubeLink, tutorialTitle, tutorialSourceType]);
+  }, [tutorialYoutubeLink, startTime, endTime]);
 
   const copyToClipboard = async () => {
     try {
@@ -177,6 +160,7 @@ export default function JsonProcessor() {
       });
     }
   };
+
   return (
     <div className="container mx-auto p-4 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6 text-center">
@@ -185,30 +169,10 @@ export default function JsonProcessor() {
       <Tabs defaultValue="topic" className="w-full">
         <ScrollArea className="w-full">
           <TabsList className="inline-flex h-auto space-x-2 rounded-md bg-muted p-1 text-muted-foreground">
-            <TabsTrigger
-              value="topic"
-              className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
-            >
-              Topic Editor
-            </TabsTrigger>
-            <TabsTrigger
-              value="combined"
-              className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
-            >
-              Combined Operations
-            </TabsTrigger>
-            <TabsTrigger
-              value="youtube"
-              className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
-            >
-              YouTube Embedder
-            </TabsTrigger>
-            <TabsTrigger
-              value="tutorial"
-              className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
-            >
-              Tutorial Creator
-            </TabsTrigger>
+            <TabsTrigger value="topic">Topic Editor</TabsTrigger>
+            <TabsTrigger value="combined">Combined Operations</TabsTrigger>
+            <TabsTrigger value="youtube">YouTube Embedder</TabsTrigger>
+            <TabsTrigger value="tutorial">Tutorial Creator</TabsTrigger>
           </TabsList>
         </ScrollArea>
         <Card className="mt-4">
@@ -287,8 +251,7 @@ export default function JsonProcessor() {
               <CardHeader>
                 <CardTitle>YouTube Link Converter</CardTitle>
                 <CardDescription>
-                  Converts a YouTube link to its embed version with optional
-                  start and end times.
+                  Converts a YouTube link to its embed version with optional start and end times.
                 </CardDescription>
               </CardHeader>
               <div className="space-y-4">
@@ -344,9 +307,7 @@ export default function JsonProcessor() {
               <CardHeader>
                 <CardTitle>Tutorial Creator</CardTitle>
                 <CardDescription>
-                  Create a tutorial entry by providing a topic name, YouTube
-                  link, and title. The source type will be determined
-                  automatically.
+                  Create a tutorial entry by providing details including YouTube link, language, and unit.
                 </CardDescription>
               </CardHeader>
               <div className="space-y-4">
@@ -370,6 +331,28 @@ export default function JsonProcessor() {
                     className="mt-2"
                   />
                 </div>
+                <div className="flex space-x-4">
+                  <div className="flex-1">
+                    <Label htmlFor="tutorial-start-time">Start Time (mm:ss)</Label>
+                    <Input
+                      id="tutorial-start-time"
+                      placeholder="00:00"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Label htmlFor="tutorial-end-time">End Time (mm:ss)</Label>
+                    <Input
+                      id="tutorial-end-time"
+                      placeholder="00:00"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
                 <div>
                   <Label htmlFor="tutorial-title">Video Title</Label>
                   <Input
@@ -380,6 +363,37 @@ export default function JsonProcessor() {
                     className="mt-2"
                   />
                 </div>
+                <div>
+                  <Label htmlFor="tutorial-language">Language</Label>
+                  <Input
+                    id="tutorial-language"
+                    placeholder="Enter language"
+                    value={tutorialLanguage}
+                    onChange={(e) => setTutorialLanguage(e.target.value)}
+                    className="mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="tutorial-unit">Unit</Label>
+                  <Input
+                    id="tutorial-unit"
+                    placeholder="Enter unit number"
+                    value={tutorialUnit}
+                    onChange={(e) => setTutorialUnit(e.target.value)}
+                    className="mt-2"
+                  />
+                </div>
+                {embedLink && (
+                  <div className="mt-4">
+                    <Label htmlFor="tutorial-embed-link">Embed Link</Label>
+                    <Input
+                      id="tutorial-embed-link"
+                      value={embedLink}
+                      readOnly
+                      className="mt-2"
+                    />
+                  </div>
+                )}
                 <div>
                   <Label htmlFor="tutorial-json">Generated JSON</Label>
                   <div className="relative">

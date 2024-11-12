@@ -23,7 +23,8 @@ export default function JsonProcessor() {
   const [youtubeLink, setYoutubeLink] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [embedLink, setEmbedLink] = useState("");
+  // Remove this line
+  // const [embedLink, setEmbedLink] = useState("");
 
   const [tutorialTopic, setTutorialTopic] = useState("");
   const [tutorialYoutubeLink, setTutorialYoutubeLink] = useState("");
@@ -81,11 +82,10 @@ export default function JsonProcessor() {
     }
   };
 
-  const convertYoutubeLink = (link: string) => {
+  const convertYoutubeLink = (link: string): string => {
     const videoId = link.split("v=")[1];
     if (!videoId) {
-      setEmbedLink("Invalid YouTube link");
-      return;
+      return "Invalid YouTube link";
     }
 
     let embedUrl = `https://www.youtube.com/embed/${videoId}`;
@@ -105,7 +105,7 @@ export default function JsonProcessor() {
       embedUrl += `?${params.join("&")}`;
     }
 
-    setEmbedLink(embedUrl);
+    return embedUrl;
   };
 
   const convertTimeToSeconds = (time: string): number | null => {
@@ -126,18 +126,19 @@ export default function JsonProcessor() {
         setTutorialSourceType("other");
       }
 
+      const embeddableLink = convertYoutubeLink(tutorialYoutubeLink);
+
       const jsonStructure = {
         topic: tutorialTopic,
         sourceType: tutorialSourceType,
         title: tutorialTitle,
-        url: tutorialYoutubeLink,
+        url: embeddableLink,
         language: tutorialLanguage,
         unit: tutorialUnit,
-        embedLink: embedLink,
       };
       setTutorialJson(JSON.stringify(jsonStructure, null, 2));
     }
-  }, [tutorialTopic, tutorialYoutubeLink, tutorialTitle, tutorialSourceType, tutorialLanguage, tutorialUnit, embedLink]);
+  }, [tutorialTopic, tutorialYoutubeLink, tutorialTitle, tutorialSourceType, tutorialLanguage, tutorialUnit, startTime, endTime]);
 
   useEffect(() => {
     if (tutorialYoutubeLink) {
@@ -290,7 +291,7 @@ export default function JsonProcessor() {
                     />
                   </div>
                 </div>
-                {embedLink && (
+                {/* {embedLink && (
                   <div className="mt-4">
                     <Label htmlFor="embed-link">Embed Link</Label>
                     <Input
@@ -300,7 +301,7 @@ export default function JsonProcessor() {
                       className="mt-2"
                     />
                   </div>
-                )}
+                )} */}
               </div>
             </TabsContent>
             <TabsContent value="tutorial">
@@ -327,7 +328,10 @@ export default function JsonProcessor() {
                     id="tutorial-youtube-link"
                     placeholder="https://www.youtube.com/watch?v=..."
                     value={tutorialYoutubeLink}
-                    onChange={(e) => setTutorialYoutubeLink(e.target.value)}
+                    onChange={(e) => {
+                      setTutorialYoutubeLink(e.target.value);
+                      // The JSON will be updated automatically via the useEffect hook
+                    }}
                     className="mt-2"
                   />
                 </div>
@@ -383,17 +387,6 @@ export default function JsonProcessor() {
                     className="mt-2"
                   />
                 </div>
-                {embedLink && (
-                  <div className="mt-4">
-                    <Label htmlFor="tutorial-embed-link">Embed Link</Label>
-                    <Input
-                      id="tutorial-embed-link"
-                      value={embedLink}
-                      readOnly
-                      className="mt-2"
-                    />
-                  </div>
-                )}
                 <div>
                   <Label htmlFor="tutorial-json">Generated JSON</Label>
                   <div className="relative">
